@@ -1,4 +1,20 @@
 var Page=window.Page||{};
+
+
+function getRemoteData() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: 'http://localhost:3000/rules',
+            type: 'GET',
+            success: function(data) {
+                resolve(data);
+                console.log(data);
+            }
+        })
+    });
+}
+
+
 Page.Storage=(function(){
     var changeHandlers=[];
     if(!localStorage.Data){
@@ -58,6 +74,9 @@ Page.Storage=(function(){
         addLink(json,callback){
             json.link.checked=true;
             _storage.groups[json.group].links.push(json.link);
+            if (_storage.groups[json.group].remote) {
+                _storage.groups[json.group].sync = false;
+            }
             updateLocalStorage();
             callback({err:false});
         },
@@ -93,6 +112,23 @@ Page.Storage=(function(){
         },
         getData(){
             _storage=JSON.parse(localStorage.Data);
+            getRemoteData().then((data) => {
+                var groups = _storage.groups;
+                data.forEach(g => {
+                    if (groups[g]) {
+                        groups[g].remote = true;
+                    }else {
+                        groups[g] = {
+                            checked: false,
+                            name: g,
+                            desc: '',
+                            links:[]
+                        }
+                    }
+                });
+                updateLocalStorage();
+
+            })
             window._storage= _storage;
             return _storage;
         }

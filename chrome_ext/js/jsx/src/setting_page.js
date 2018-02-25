@@ -150,6 +150,16 @@ Page.App=(function(){
             componentDidMount() {
                 this.props.onSelected(this.state.selectedGroup);
             },
+            saveGroup(group) {
+                $.ajax({
+                    url: 'http://localhost:3000/rule/'+group.name,
+                    type: 'POST',
+                    data: "data="+JSON.stringify(group.links),
+                    success: function(data) {
+                        console.log(data);
+                    }
+                })
+            },
             render(){
                 var self=this;
                 var li=[];
@@ -196,6 +206,11 @@ Page.App=(function(){
                                     }
                                 })()}
                             ></i>
+                            {
+                                if (tempGroup.sync) {
+                                    <i className="fas fa-sync" onClick={this.saveGroup(tempGroup)}></i>
+                                }
+                            }
                     </li>)
                 }
                 return  <div className="scrollBox">
@@ -221,7 +236,7 @@ Page.App=(function(){
                 origin:this.props.data?this.props.data.origin:null,
                 target:this.props.data?this.props.data.target:null,
                 type:this.props.data?this.props.data.type:false,    //false: normal 只对比host+path true:force 将按照字符串匹配
-                domainLimit:this.props.data?this.props.data.domainLimit:null 
+                domainLimit:this.props.data?this.props.data.domainLimit:null
             }
         },
         close(){
@@ -265,7 +280,7 @@ Page.App=(function(){
                 origin:newProps.data?newProps.data.origin:null,
                 target:newProps.data?newProps.data.target:null,
                 type:newProps.data?newProps.data.type:false, //false: normal 只对比host+path true:force 将按照字符串匹配
-                domainLimit:newProps.data?newProps.data.domainLimit:null 
+                domainLimit:newProps.data?newProps.data.domainLimit:null
             });
         },
         render(){
